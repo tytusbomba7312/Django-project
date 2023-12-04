@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from calc.models import User
+from calc.models import User, Note
 import json
 import hashlib
 
@@ -49,6 +49,25 @@ def login(request):
     password = hashlib.sha256(data["password"].encode("utf-8")).hexdigest()
     try:
         user = User.objects.get(username=username, password=password)
+        user.login_count += 1
+        user.save()
         return HttpResponse("Logged successfully!", status=200)
     except:
         return HttpResponse("Wrong username or password!", status=400)
+
+@csrf_exempt
+def get_notes(request):
+    data = json.loads(request.body)
+    username = data["username"]
+    password = hashlib.sha256(data["password"].encode("utf-8")).hexdigest()
+    min_length = data.get("min_length", 0)
+    try:
+        user = User.objects.get(username=username, password=password)
+    except:
+        return HttpResponse("Wrong username or password!", status=400)
+    notes = Note.objects.filter(user=user)
+    notes_data = []
+    for note in notes:
+        if note.is_longer_than(min_length):
+            notes_data.append([note.content])
+    return JsonResponse({"notes":notes_data})

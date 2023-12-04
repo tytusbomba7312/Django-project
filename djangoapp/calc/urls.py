@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import hello, calc, get_users, add_user, login
+from .views import hello, calc, get_users, add_user, login, get_notes
 
 urlpatterns = [
     # For hello/?x=10
@@ -10,4 +10,5 @@ urlpatterns = [
     path('users', get_users),
     path('adduser', add_user),
     path('login', login),
+    path('getnotes', get_notes),
 ]
